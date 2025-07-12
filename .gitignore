@@ -1,0 +1,6 @@
+node_modules
+venv
+videos
+__pycache__
+*.pyc
+hand_gest
