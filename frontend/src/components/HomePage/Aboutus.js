@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Typography, Button, Paper } from '@mui/material';
+import { Grid, Typography } from '@mui/material';
 import Bg from '../../images/bg2.png';
 
 const Goal = () => {
@@ -22,7 +22,7 @@ const Goal = () => {
                     </Typography>
                 </Grid>
             </Grid>
-            <img src={Bg} alt="Image" style={{ 
+            <img src={Bg} alt="Event" style={{ 
                 width: '80%',
                 marginTop: '8rem' }} />
         </div>

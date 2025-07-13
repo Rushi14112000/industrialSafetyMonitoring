@@ -1,4 +1,3 @@
-
 import cv2
 import torch
 import math
@@ -11,13 +10,13 @@ from torch.nn.functional import softmax
 from collections import Counter
 
 # === CONFIG ===
-video_source = "C:/Users/LENOVO/Desktop/FinalProject/IndustrialSafetyMonitoring/videos/all3detection.mp4"
+video_source = "C:/Users/LENOVO/Desktop/FinalProject/IndustrialSafetyMonitoring/videos/all_detection_1.mp4"
 image_save_path = "D:/Coding/IBM/images"
 fire_alert_path = "D:/Coding/IBM/alert_fire"
 handgest_alert_path = "D:/Coding/IBM/alert_danger"
-backend_fire_url = "https://3df1-2409-40f2-12f-e57a-38d0-e3e5-2576-28b6.ngrok-free.app/firealert"
-backend_gear_url = "https://3df1-2409-40f2-12f-e57a-38d0-e3e5-2576-28b6.ngrok-free.app/safetygear"
-backend_hand_url = "https://3df1-2409-40f2-12f-e57a-38d0-e3e5-2576-28b6.ngrok-free.app/handgesture"
+backend_fire_url = "https://49aec3830be3.ngrok-free.app/firealert"
+backend_gear_url = "https://49aec3830be3.ngrok-free.app/safetygear"
+backend_hand_url = "https://49aec3830be3.ngrok-free.app/handgesture"
 model_hand_gesture = "dima806/hand_gestures_image_detection"
 
 os.makedirs(image_save_path, exist_ok=True)
@@ -63,31 +62,35 @@ for sec in range(duration):
     frame_path = os.path.join(image_save_path, f"frame_{sec}.jpg")
     cv2.imwrite(frame_path, frame)
 
-    # === Fire Detection ===
+    # === FIRE DETECTION ===
     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     fire_inputs = fire_processor(images=rgb, return_tensors="pt")
     with torch.no_grad():
         fire_outputs = fire_model(**fire_inputs)
     fire_probs = softmax(fire_outputs.logits, dim=1).squeeze().tolist()
-    fire_label = fire_labels[fire_probs.index(max(fire_probs))]
+    max_idx = fire_probs.index(max(fire_probs))
+    fire_label = fire_labels[max_idx]
 
-    print(f"[{sec}s] 🔥 Fire: {fire_label} | Probs: {fire_probs}")
-
-    if fire_label == "Fire":
+    if fire_label == "Smoke":
+        print(f"[{sec}s] ⚠️ Smoke detected — skipping fire alert only.")
+    elif fire_label == "Fire":
+        print(f"[{sec}s] 🔥 Fire detected | Probs: {fire_probs}")
         fire_frame_path = os.path.join(fire_alert_path, f"fire_{sec}.jpg")
         cv2.imwrite(fire_frame_path, frame)
         fire_alert = {
-        "camera_id": "camera_001",
-        "video_link": fire_frame_path.replace("\\", "/"),
-        "timestamp": datetime.now().isoformat()
+            "camera_id": "camera_001",
+            "video_link": fire_frame_path.replace("\\", "/"),
+            "timestamp": datetime.now().isoformat()
         }
         try:
             res = requests.post(backend_fire_url, json=fire_alert)
             print("📡 Fire alert sent:", res.json() if res.headers.get('Content-Type') == 'application/json' else res.text)
         except Exception as e:
             print("❌ Fire alert error:", e)
+    else:
+        print(f"[{sec}s] ✅ No fire detected | Probs: {fire_probs}")
 
-    # === Safety Gear Detection ===
+    # === SAFETY GEAR DETECTION ===
     safety_results = safety_model.predict(frame, verbose=False)
     detections = []
     for result in safety_results:
@@ -99,7 +102,7 @@ for sec in range(duration):
 
     gear_data = dict(Counter(detections))
     summary = ", ".join([f"{v} {k}" for k, v in gear_data.items()])
-    print(f"{sec}: 640x640 {summary}")
+    print(f"[{sec}s] 🦺 Safety Gear Detected: {summary}")  # ✅ Ensured to always print
 
     gear_body = {
         "camera-id": "camera_001",
@@ -120,7 +123,7 @@ for sec in range(duration):
     except Exception as e:
         print("❌ Safety gear alert error:", e)
 
-        # === Hand Gesture Detection ===
+    # === HAND GESTURE DETECTION ===
     hand_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     hand_inputs = hand_processor(images=hand_rgb, return_tensors="pt")
     with torch.no_grad():

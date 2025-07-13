@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Typography, Button } from '@mui/material';
+import { Grid, Typography } from '@mui/material';
 import GppGoodIcon from '@mui/icons-material/GppGood';
 import WavingHandIcon from '@mui/icons-material/WavingHand';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';

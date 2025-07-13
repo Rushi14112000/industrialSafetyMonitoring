@@ -35,7 +35,7 @@ export default function Dashboard() {
             // );
             // const data = await response.json();
             const response = await fetch(
-              `https://3df1-2409-40f2-12f-e57a-38d0-e3e5-2576-28b6.ngrok-free.app/getdata?user_id=${uid}&user_type=${loginType}`,
+              `https://49aec3830be3.ngrok-free.app/getdata?user_id=${uid}&user_type=${loginType}`,
               {
                 method: "GET",
                 headers: {

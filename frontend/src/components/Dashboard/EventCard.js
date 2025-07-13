@@ -17,7 +17,7 @@ const EventCard = ({ imageUrl, location, videoLink }) => {
               objectFit: 'cover',
               borderRadius: '20px',
             }}
-            alt="Event Image"
+            alt="Event"
           />
           <div
             style={{

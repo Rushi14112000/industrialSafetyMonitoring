@@ -12,7 +12,7 @@ const AccidentCharts = () => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `https://3df1-2409-40f2-12f-e57a-38d0-e3e5-2576-28b6.ngrok-free.app/getstats?user_id=${userId}&user_type=${userType}`,
+          `https://49aec3830be3.ngrok-free.app/getstats?user_id=${userId}&user_type=${userType}`,
           {
                 method: "GET",
                 headers: {

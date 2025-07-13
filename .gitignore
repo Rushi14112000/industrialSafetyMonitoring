@@ -3,7 +3,5 @@ venv
 videos
 __pycache__
 *.pyc
-hand_gest
 flask_api/ibm-safety-net-firebase-adminsdk.json
-yolo_models
-models
+

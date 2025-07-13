@@ -479,6 +479,13 @@ def safety_gear():
         print(info)
 
         timestamp_obj = get_timestamp_obj(timestamp)
+        
+        person_count = info.get("Person", 0)
+        ws.emit("notification",  {
+                "type": "crowd",
+                "person_count": person_count,
+                "timestamp": datetime.now().isoformat()
+        }   )
 
         temp = {
             "hard-hat": info.get("Hardhat", 0),
