@@ -3,4 +3,5 @@ venv
 videos
 __pycache__
 *.pyc
+*.json
 flask_api/firebase-adminsdk.json
