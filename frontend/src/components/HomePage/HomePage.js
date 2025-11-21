@@ -4,7 +4,7 @@ import Banner from "./Banner";
 import Goals from "./Aboutus";
 import Tech from "./Technology";
 import PreFoot from "./PreFoot";
-
+import Footer from "./footer";
 const HomePage = () => {
     return (
         <div>
@@ -13,6 +13,7 @@ const HomePage = () => {
             <Goals />
             <Tech />
             <PreFoot />
+            <Footer />
         </div>
     )
 }

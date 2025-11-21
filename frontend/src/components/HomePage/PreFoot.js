@@ -20,7 +20,7 @@ const PreFoot = () => {
                         <p style={{
                             color: 'white',
                         }}>
-                        SafetyNet is a comprehensive industrial safety and surveillance system designed to enhance workplace safety and security. Leveraging live video streams from multiple areas within an industrial environment, it utilizes advanced computer vision and machine learning algorithms and IOT sensors  to monitor worker compliance with safety gear, detect signs of fire, gas leaks and recognize distress signals. By providing real-time alerts and notifications to both workers and supervisors, SafetyNet aims to minimize workplace accidents, ensure prompt responses to emergencies, and improve overall safety conditions in industrial settings.
+                        SafetyNet is a comprehensive industrial safety and surveillance system designed to enhance workplace safety and security. Leveraging live video streams from multiple areas within an industrial environment, it utilizes advanced computer vision and machine learning algorithms to monitor worker compliance with safety gear, detect signs of fire and recognize distress signals. By providing real-time alerts and notifications to both workers and supervisors, SafetyNet aims to minimize workplace accidents, ensure prompt responses to emergencies, and improve overall safety conditions in industrial settings.
                         </p>
                         <Button variant="contained" style={{
                             backgroundColor: 'black',
