@@ -14,18 +14,19 @@ video_source = "C:/Users/LENOVO/Desktop/FinalProject/IndustrialSafetyMonitoring/
 image_save_path = "D:/Coding/IBM/images"
 fire_alert_path = "D:/Coding/IBM/alert_fire"
 handgest_alert_path = "D:/Coding/IBM/alert_danger"
-backend_fire_url = "https://49aec3830be3.ngrok-free.app/firealert"
-backend_gear_url = "https://49aec3830be3.ngrok-free.app/safetygear"
-backend_hand_url = "https://49aec3830be3.ngrok-free.app/handgesture"
+backend_fire_url = "https://c89491703810.ngrok-free.app/firealert"
+backend_gear_url = "https://c89491703810.ngrok-free.app/safetygear"
+backend_hand_url = "https://c89491703810.ngrok-free.app/handgesture"
 model_hand_gesture = "dima806/hand_gestures_image_detection"
+model_fire_detection = "EdBianchi/vit-fire-detection"
 
 os.makedirs(image_save_path, exist_ok=True)
 os.makedirs(fire_alert_path, exist_ok=True)
 
 # === Load Fire Detection Model ===
 print("🔥 Loading fire model...")
-fire_processor = AutoImageProcessor.from_pretrained("EdBianchi/vit-fire-detection")
-fire_model = AutoModelForImageClassification.from_pretrained("EdBianchi/vit-fire-detection")
+fire_processor = AutoImageProcessor.from_pretrained(model_fire_detection)
+fire_model = AutoModelForImageClassification.from_pretrained(model_fire_detection)
 fire_model.eval()
 fire_labels = ["Fire", "Nothing", "Smoke"]
 
@@ -102,7 +103,7 @@ for sec in range(duration):
 
     gear_data = dict(Counter(detections))
     summary = ", ".join([f"{v} {k}" for k, v in gear_data.items()])
-    print(f"[{sec}s] 🦺 Safety Gear Detected: {summary}")  # ✅ Ensured to always print
+    print(f"[{sec}s] 🦺 Safety Gear Detected: {summary}")
 
     gear_body = {
         "camera-id": "camera_001",
@@ -155,6 +156,8 @@ for sec in range(duration):
             print("❌ Hand gesture alert error:", e)
     else:
         print(f"[{sec}s] ⚫ No relevant gesture detected or low confidence ({confidence:.2f})")
+    print("-" * 80)
+    
 
 cap.release()
 cv2.destroyAllWindows()

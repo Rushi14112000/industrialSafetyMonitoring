@@ -3,5 +3,4 @@ venv
 videos
 __pycache__
 *.pyc
-flask_api/ibm-safety-net-firebase-adminsdk.json
 

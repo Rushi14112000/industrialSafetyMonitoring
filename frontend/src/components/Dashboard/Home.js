@@ -30,12 +30,8 @@ export default function Dashboard() {
 
         const fetchEvents = async () => {
           try {
-            // const response = await fetch(
-            //   `https://e9bc-2405-201-d00b-3829-108f-9904-87fa-a639.ngrok-free.app/getdata?user_id=${uid}&user_type=${loginType}`
-            // );
-            // const data = await response.json();
             const response = await fetch(
-              `https://49aec3830be3.ngrok-free.app/getdata?user_id=${uid}&user_type=${loginType}`,
+              `https://c89491703810.ngrok-free.app/getdata?user_id=${uid}&user_type=${loginType}`,
               {
                 method: "GET",
                 headers: {
@@ -45,20 +41,6 @@ export default function Dashboard() {
             );
 
             const data = await response.json();
-
-
-            // const processedSafetyData = data.safety_gear_data.map((safetyItem) => {
-            //   const text = Object.keys(safetyItem.data)
-            //     .filter((key) => key.startsWith('no-'))
-            //     .map((key) => `${safetyItem.data[key]} No ${key.replace('no-', '')}`)
-            //     .join(', ');
-
-            //   return {
-            //     ...safetyItem,
-            //     text,
-            //   };
-            // });
-
 
             const processedSafetyData = data.safety_gear_data.map((safetyItem) => {
               const { data } = safetyItem;

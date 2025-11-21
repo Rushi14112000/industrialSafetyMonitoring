@@ -29,7 +29,7 @@ config = {
     "CORS_HEADERS": "Content-Type",
 }
 
-cred = credentials.Certificate("ibm-safety-net-firebase-adminsdk.json")
+cred = credentials.Certificate("firebase-adminsdk.json")
 firebase_app = firebase_admin.initialize_app(cred)
 db = firestore.client()
 
@@ -39,7 +39,6 @@ app.config.from_mapping(config)
 ws = SocketIO(app)
 ws.init_app(app, cors_allowed_origins="*")
 cache = Cache(app)
-# CORS(app)
 CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
 
 class Get_Data:
@@ -47,7 +46,7 @@ class Get_Data:
         self.user_id = user_id
         self.user_type = user_type
 
-    # monthly counts chaiye
+    # monthly counts
     def sensor_data(self):
         
         ref = db.collection(self.user_type).document(self.user_id)
@@ -79,42 +78,8 @@ class Get_Data:
             for ele in un:
                 count = np.count_nonzero(l == ele)
                 d[str(ele)] = count
-            # print(d)
             return d
-        # do for admin
-        elif self.user_type == "admin":
-            data_list = []
-            l = []
-            d = {}
-            count = 0
-            site_id = data["sites_id"]
-            # print(site_id)
-            for sites in site_id:
-                data_ref = db.collection("sensor").where(filter = FieldFilter("site_id", "==", sites)).get()
-                for docs in data_ref:
-                    data_dict = {}
-                    readings = []
-                    time_str = []
-                    data = docs.to_dict()
-                    for i in data['data']:
-                        readings.append(i['reading'])
-                        time = datetime.fromtimestamp(i['timestamp'].timestamp())
-                        time_str.append(time)
-                        data_dict.update({"readings": readings, "timestamp": time_str})
-                    data_list.append(data_dict)
-                    for all in range(len(data_list)):
-                        for item in range(len(data_list[all]["readings"])):
-                            if data_list[all]['readings'][item] == True:
-                                l.append(data_list[all]['timestamp'][item].month)
-            l = np.array(l)
-            un = np.unique(l)
-            for ele in un:
-                count = np.count_nonzero(l == ele)
-                d[str(ele)] = count
-            # print(d)
-            return d
-    
-    # isme chaiye 1. safety score 2. camera_id se map karo safety score 3. time by time safety score ka graph for each camera 4. aggrgate safety score for each site
+        
     def safety_gear_data(self):
         ref = db.collection(self.user_type).document(self.user_id)
         data = ref.get().to_dict()
@@ -131,12 +96,6 @@ class Get_Data:
                 data_dict = {}
                 score = 0
                 for items in docs.to_dict()['data']:
-                    
-                    # score = (
-                    #     int(items.get('safety-vest', 0)) +
-                    #     int(items.get('hard-hat', 0)) +
-                    #     int(items.get('mask', 0))
-                    #     ) / (3 * max(1, int(items.get('person', 0))))
                     
                     person_count = int(items.get('person', 0))
                     if person_count == 0:
@@ -162,39 +121,6 @@ class Get_Data:
                 avg = avg + dic['safety_score']
             avg = avg/len(data_list)
             return [data_list,avg]
-        # do for admin
-        elif self.user_type == "admin":
-            data_list = []
-            site_id = data["sites_id"]
-            for sites in site_id:
-                avg = 0
-                sc = 0
-                sc3 = 0
-                data_ref = db.collection("safety-gear").where(filter = FieldFilter("site_id", "==", sites)).get()
-                for docs in data_ref:
-                    # refer = db.collection("cameras").document(docs.id)
-                    safety_score = []
-                    data_dict = {}
-                    score = 0
-                    for items in docs.to_dict()['data']:
-                        score = (int(items['safety-vest'])+int(items['hard-hat'])+int(items['mask']))/(3*int(items['person']))
-                        avg = avg + score
-                        safety_score.append(score)
-                    for sc2 in safety_score:
-                        sc = sc + sc2
-                    length = len(safety_score) if len(safety_score) != 0 else 1
-                    sc1 = sc/length
-                    sc3 += sc1
-                sc3 = sc3/len(data_ref)
-                loc = db.collection("sites").document(sites).get().to_dict()['site_location']
-                data_dict.update({"location": loc,"safety_score": round(sc3*100,2)})
-                data_list.append(data_dict)
-            avg = 0
-            for dic in data_list:
-                avg = avg + dic['safety_score']
-            avgx = avg/len(data_list)
-            # avg_dict = {"avg": avgx}
-            return [data_list, avgx]
 
     def fire_stats(self):
         ref = db.collection(self.user_type).document(self.user_id)
@@ -213,23 +139,6 @@ class Get_Data:
             for ele in un:
                 count = np.count_nonzero(l == ele)
                 duration_dict[str(ele)] = count
-                # time_duration.append(duration)
-            return duration_dict
-        elif self.user_type == "admin":
-            l = []
-            site_id = data["sites_id"]
-            duration_dict = {}
-            for sites in site_id:
-                data_ref = db.collection("fire-detection").where(filter = FieldFilter("site_id", "==", sites)).get()
-                for docs in data_ref:
-                    for ele in docs.to_dict()['data']:
-                        time = datetime.fromtimestamp(ele['timestamp'].timestamp())
-                        l.append(time.month)
-            l = np.array(l)
-            un = np.unique(l)
-            for ele in un:
-                count = np.count_nonzero(l == ele)
-                duration_dict[str(ele)] = count
             return duration_dict
     
     def hand_gesture_data(self):
@@ -243,19 +152,9 @@ class Get_Data:
                 time = datetime.fromtimestamp(docs.to_dict()['data'][-1]['timestamp'].timestamp())
                 now = datetime.now()
                 duration = (now - time).days
-                # time_duration.append(duration)
                 duration_dict[docs.id] = duration
             return duration_dict
-        elif self.user_type == "admin":
-            site_id = data["sites_id"]
-            for sites in site_id:
-                data_ref = db.collection("hand-gesture").where(filter = FieldFilter("site_id", "==", sites)).get()
-                for docs in data_ref:
-                    time = datetime.fromtimestamp(docs.to_dict()['data'][-1]['timestamp'].timestamp())
-                    now = datetime.now()
-                    duration = (now - time).days
-                    duration_dict[docs.id] = duration
-            return duration_dict
+        
         
 
     def sensor_fire(self):
@@ -390,74 +289,6 @@ def get_data():
             output["fire_detection_data"] = get_latest_entry("fire-detection", site["site_id"], cam_ref)
             output["hand_gesture_data"] = get_latest_entry("hand-gesture", site["site_id"], cam_ref)
 
-        elif user_type == "admin":
-            sites_ref = db.collection("sites").where(filter=firestore.FieldFilter("admin_id", "==", user_id))
-            sites = []
-            site_ids = {}
-            for site in sites_ref.get():
-                temp = site.to_dict()
-                temp["site_id"] = site.id
-                site_ids[site.id] = temp
-                sites.append(temp)
-            output["sites"] = sites
-
-            managers_ref = db.collection("managers").where(filter=firestore.FieldFilter("admin_id", "==", user_id))
-            managers = []
-            for manager in managers_ref.get():
-                temp = manager.to_dict()
-                temp["manager_id"] = manager.id
-                managers.append(temp)
-            output["managers"] = managers
-
-            cameras_ref = db.collection("cameras").where(
-                filter=firestore.FieldFilter("site_id", "in", list(site_ids.keys())))
-            cam = []
-            cam_ref = {}
-            for camera in cameras_ref.get():
-                temp = camera.to_dict()
-                temp["camera_id"] = camera.id
-                temp["location"] = f"{site_ids[temp['site_id']]['site_location']}, {temp['location']}"
-                cam_ref[camera.id] = temp
-                cam.append(temp)
-            output["camera_data"] = cam
-
-            sensor_ref = db.collection("sensor").where(
-                filter=firestore.FieldFilter("site_id", "in", list(site_ids.keys())))
-            sensor_data = []
-            for sensor in sensor_ref.get():
-                temp = sensor.to_dict()
-                temp.pop("data", None)
-                temp["sensor_id"] = sensor.id
-                temp["location"] = f"{site_ids[temp['site_id']]['site_location']}, {temp['location']}"
-                sensor_data.append(temp)
-            output["sensor_data"] = sensor_data
-
-            def get_admin_latest(collection):
-                ref = db.collection(collection).where(
-                    filter=firestore.FieldFilter("site_id", "in", list(site_ids.keys())))
-                result = []
-                for doc in ref.get():
-                    temp = doc.to_dict()
-                    if "data" in temp and temp["data"]:
-                        latest = sorted(temp["data"], key=lambda x: x["timestamp"])[-1]
-                        entry = {
-                            "camera_id": doc.id,
-                            "site_id": temp["site_id"],
-                            "timestamp": format_ist_timestamp(latest["timestamp"]),
-                            "location": cam_ref.get(doc.id, {}).get("location", "")
-                        }
-                        if collection == "safety-gear":
-                            latest.pop("timestamp")
-                            entry["data"] = latest
-                        else:
-                            entry["video_link"] = latest["video_link"]
-                        result.append(entry)
-                return result
-
-            output["safety_gear_data"] = get_admin_latest("safety-gear")
-            output["fire_detection_data"] = get_admin_latest("fire-detection")
-            output["hand_gesture_data"] = get_admin_latest("hand-gesture")
-
         output["status"] = "success"
         return jsonify(output)
 
@@ -588,50 +419,6 @@ def fire_alert():
         return jsonify({"status": "success"})
     except Exception as e:
         return jsonify({"status": f"error {str(e)}"}), 500
-
-
-# @app.route("/sensor", methods=["POST"])
-# def read_sensor():
-#     # sensor-id-string, reading-bool, timestamp-{}
-#     try:
-#         data = request.json
-#         doc_id = data["sensor-id"]
-#         reading = data["reading"]
-#         timestamp = data["timestamp"]
-#         timestamp_obj = get_timestamp_obj(timestamp)
-#         doc_ref = db.collection("sensor").document(doc_id)
-#         doc_ref.update(
-#             {
-#                 "data": firestore.ArrayUnion(
-#                     [{"timestamp": timestamp_obj, "reading": reading}]
-#                 )
-#             }
-#         )
-#         if reading == True:
-#             if cache.get("sensor-cache") == None:
-#                 cache.set("sensor-cache", 1)
-#             else:
-#                 if cache.get("sensor-cache") >= 5:
-#                     sensor_ref = db.collection("sensor").document(doc_id)
-#                     sensor_data = sensor_ref.get().to_dict()
-
-#                     data.update({"location": sensor_data["location"]})
-#                     data["type"] = "sensor"
-#                     data.update(
-#                         {"timestamp": timestamp_obj.strftime("%d/%m/%Y %H:%M:%S")}
-#                     )
-
-#                     ws.emit("notification", data)
-#                     send_email(sender_email='rushirpatil14@gmail.com',sender_password='ywuc gtpa khwy loty',receiver_email='rushirpatil491@gmail.com',subject='Gas Leak!',message=f'Gas leak at location {sensor_data["location"]}')
-#                     cache.set("sensor-cache", 0)
-#                 cache.set("sensor-cache", cache.get("sensor-cache") + 1)
-#         else:
-#             cache.set("sensor-cache", 0)
-
-#         return jsonify({"status": "success"})
-#     except Exception as e:
-#         return jsonify({"status": f"error {str(e)}"}), 500
-
 
 from datetime import datetime, timedelta, timezone
 
